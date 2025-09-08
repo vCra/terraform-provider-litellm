@@ -74,11 +74,11 @@ type ServiceAccountUpdateRequest struct {
 	MaxParallelRequests *int                   `json:"max_parallel_requests,omitempty"` // Maximum parallel requests
 	Guardrails          []string               `json:"guardrails,omitempty"`            // List of guardrails
 	Prompts             []string               `json:"prompts,omitempty"`               // List of prompts
-	TeamID              string                 `json:"team_id"`                         // The team id the service account belongs to
+	TeamID              string                 `json:"team_id,omitempty"`               // The team id the service account belongs to
 	Metadata            map[string]interface{} `json:"metadata,omitempty"`              // Metadata for the service account containing service_account_id
-	Token               string                 `json:"token"`                           // The token identifier for updates
+	Token               string                 `json:"token,omitempty"`                 // The token identifier for updates
 	DisabledCallbacks   []string               `json:"disabled_callbacks,omitempty"`    // Disabled callbacks
-	Key                 string                 `json:"key,omitempty"`                   // The key value for updates
+	Key                 string                 `json:"key"`                             // The key value for updates
 	ObjectPermission    map[string]interface{} `json:"object_permission,omitempty"`     // Object-level permissions
 }
 

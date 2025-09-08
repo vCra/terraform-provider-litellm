@@ -63,7 +63,7 @@ func GetServiceAccount(ctx context.Context, c *litellm.Client, keyID string) (*S
 // updateServiceAccount updates a service account using the /key/update endpoint
 func UpdateServiceAccount(ctx context.Context, c *litellm.Client, keyID string, request *ServiceAccountUpdateRequest) (*ServiceAccountGenerateResponse, error) {
 	// Set the token for the update request
-	request.Token = keyID
+	request.Key = keyID
 
 	// Before updating, get the current service account to preserve the service_account_id
 	// We need to call the API directly to get the full metadata including service_account_id

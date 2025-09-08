@@ -55,7 +55,7 @@ func buildServiceAccountUpdateRequest(d *schema.ResourceData) *ServiceAccountUpd
 	request := &ServiceAccountUpdateRequest{}
 
 	// Always include the token (required for updates)
-	request.Key = d.Id()
+	request.Token = d.Id()
 
 	// Include changed fields
 	if d.HasChange("key_alias") {
