@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/scalepad/terraform-provider-litellm/internal/litellm"
@@ -194,7 +193,7 @@ func deleteTeamMember(ctx context.Context, c *litellm.Client, teamID, userID, us
 	_, err := c.SendRequest(ctx, http.MethodPost, "/team/member_delete", deleteData)
 
 	// If it's a not found error, consider it successful (already deleted)
-	if err != nil && (strings.Contains(err.Error(), "not found") || strings.Contains(err.Error(), "404")) {
+	if err != nil && litellm.IsNotFound(err) {
 		return nil
 	}
 

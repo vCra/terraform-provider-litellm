@@ -23,6 +23,10 @@ func GetUser(ctx context.Context, client *litellm.Client, userID string) (*User,
 	path := fmt.Sprintf("/user/info?user_id=%s", url.QueryEscape(userID))
 	userResponse, err := litellm.SendRequestTyped[any, UserResponse](ctx, client, http.MethodGet, path, nil)
 	if err != nil {
+		// Check if it's a not found error
+		if litellm.IsNotFound(err) {
+			return nil, nil
+		}
 		return nil, fmt.Errorf("failed to get user: %w", err)
 	}
 
@@ -70,6 +74,10 @@ func DeleteUser(ctx context.Context, client *litellm.Client, userID string) erro
 	// For delete operations, we don't need the response, just check for errors
 	_, err := litellm.SendRequestTyped[UserDeleteRequest, int](ctx, client, http.MethodPost, "/user/delete", deleteReq)
 	if err != nil {
+		// If it's a not found error, consider it successful (already deleted)
+		if litellm.IsNotFound(err) {
+			return nil
+		}
 		return fmt.Errorf("failed to delete user: %w", err)
 	}
 

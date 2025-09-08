@@ -3,9 +3,9 @@ package creds
 import (
 	"context"
 	"fmt"
-	"github.com/scalepad/terraform-provider-litellm/internal/litellm"
 	"net/http"
-	"strings"
+
+	"github.com/scalepad/terraform-provider-litellm/internal/litellm"
 )
 
 func createCredential(ctx context.Context, c *litellm.Client, credential *Credential) (*Credential, error) {
@@ -24,7 +24,7 @@ func getCredential(ctx context.Context, c *litellm.Client, credentialName string
 	resp, err := c.SendRequest(ctx, http.MethodGet, endpoint, nil)
 	if err != nil {
 		// Check if it's a not found error
-		if strings.Contains(err.Error(), "not found") || strings.Contains(err.Error(), "404") {
+		if litellm.IsNotFound(err) {
 			return nil, nil
 		}
 		return nil, err
@@ -66,7 +66,7 @@ func deleteCredential(ctx context.Context, c *litellm.Client, credentialName str
 	_, err := c.SendRequest(ctx, http.MethodDelete, endpoint, nil)
 
 	// If it's a not found error, consider it successful (already deleted)
-	if err != nil && (strings.Contains(err.Error(), "not found") || strings.Contains(err.Error(), "404")) {
+	if err != nil && litellm.IsNotFound(err) {
 		return nil
 	}
 

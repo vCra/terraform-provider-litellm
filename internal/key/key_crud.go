@@ -25,6 +25,10 @@ func getKey(ctx context.Context, c *litellm.Client, keyID string) (*KeyInfoRespo
 		ctx, c, http.MethodGet, fmt.Sprintf("/key/info?key=%s", url.QueryEscape(keyID)), nil,
 	)
 	if err != nil {
+		// Check if it's a not found error
+		if litellm.IsNotFound(err) {
+			return nil, nil
+		}
 		return nil, fmt.Errorf("failed to get key: %w", err)
 	}
 
@@ -59,6 +63,10 @@ func deleteKey(ctx context.Context, c *litellm.Client, keyID string) error {
 		ctx, c, http.MethodPost, "/key/delete", &deleteRequest,
 	)
 	if err != nil {
+		// If it's a not found error, consider it successful (already deleted)
+		if litellm.IsNotFound(err) {
+			return nil
+		}
 		return fmt.Errorf("failed to delete key: %w", err)
 	}
 

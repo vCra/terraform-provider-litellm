@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"strings"
 
 	"github.com/google/uuid"
 	"github.com/scalepad/terraform-provider-litellm/internal/litellm"
@@ -31,7 +30,7 @@ func getModel(ctx context.Context, c *litellm.Client, modelID string) (*ModelRes
 	resp, err := c.SendRequest(ctx, http.MethodGet, endpoint, nil)
 	if err != nil {
 		// Check if it's a not found error
-		if strings.Contains(err.Error(), "not found") || strings.Contains(err.Error(), "404") {
+		if litellm.IsNotFound(err) {
 			return nil, nil
 		}
 		return nil, err
@@ -44,7 +43,7 @@ func updateModel(ctx context.Context, c *litellm.Client, model *Model) (*Model, 
 	_, err := c.SendRequest(ctx, http.MethodPost, "/model/update", model)
 	if err != nil {
 		// If model not found during update, try to create it instead
-		if strings.Contains(err.Error(), "not found") {
+		if litellm.IsNotFound(err) {
 			return createModel(ctx, c, model)
 		}
 		return nil, err
@@ -61,7 +60,7 @@ func deleteModel(ctx context.Context, c *litellm.Client, modelID string) error {
 	_, err := c.SendRequest(ctx, http.MethodPost, "/model/delete", deleteReq)
 
 	// If it's a not found error, consider it successful (already deleted)
-	if err != nil && (strings.Contains(err.Error(), "not found") || strings.Contains(err.Error(), "404")) {
+	if err != nil && litellm.IsNotFound(err) {
 		return nil
 	}
 

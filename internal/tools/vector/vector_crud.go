@@ -28,6 +28,10 @@ func getVectorStore(ctx context.Context, c *litellm.Client, vectorStoreID string
 		ctx, c, http.MethodPost, "/vector_store/info", request,
 	)
 	if err != nil {
+		// Check if it's a not found error
+		if litellm.IsNotFound(err) {
+			return nil, nil
+		}
 		return nil, fmt.Errorf("failed to get vector store: %w", err)
 	}
 
@@ -62,6 +66,10 @@ func deleteVectorStore(ctx context.Context, c *litellm.Client, vectorStoreID str
 		ctx, c, http.MethodPost, "/vector_store/delete", &deleteRequest,
 	)
 	if err != nil {
+		// If it's a not found error, consider it successful (already deleted)
+		if litellm.IsNotFound(err) {
+			return nil
+		}
 		return fmt.Errorf("failed to delete vector store: %w", err)
 	}
 

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"strings"
 
 	"github.com/scalepad/terraform-provider-litellm/internal/litellm"
 )
@@ -29,7 +28,7 @@ func GetTeam(ctx context.Context, c *litellm.Client, teamID string) (*TeamInfoRe
 	)
 	if err != nil {
 		// Check if it's a not found error
-		if strings.Contains(err.Error(), "not found") || strings.Contains(err.Error(), "404") {
+		if litellm.IsNotFound(err) {
 			return nil, nil
 		}
 		return nil, fmt.Errorf("failed to get team: %w", err)
@@ -61,7 +60,7 @@ func deleteTeam(ctx context.Context, c *litellm.Client, teamID string) error {
 	)
 	if err != nil {
 		// If it's a not found error, consider it successful (already deleted)
-		if strings.Contains(err.Error(), "not found") || strings.Contains(err.Error(), "404") {
+		if litellm.IsNotFound(err) {
 			return nil
 		}
 		return fmt.Errorf("failed to delete team: %w", err)
