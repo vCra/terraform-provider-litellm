@@ -3,6 +3,7 @@ package serviceaccount
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/scalepad/terraform-provider-litellm/internal/litellm"
 
@@ -24,8 +25,9 @@ func resourceServiceAccountCreate(ctx context.Context, d *schema.ResourceData, m
 	c := m.(*litellm.Client)
 
 	// Validate required fields
-	if teamID := d.Get("team_id").(string); teamID == "" {
-		return diag.Errorf("team_id is required for service account creation")
+	teamID := d.Get("team_id").(string)
+	if strings.TrimSpace(teamID) == "" {
+		return diag.Errorf("team_id is required for service account creation and cannot be empty or contain only whitespace")
 	}
 
 	request := buildServiceAccountGenerateRequest(d)
