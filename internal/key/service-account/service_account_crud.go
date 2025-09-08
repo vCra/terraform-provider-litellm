@@ -41,6 +41,10 @@ func GetServiceAccount(ctx context.Context, c *litellm.Client, keyID string) (*S
 		ctx, c, http.MethodGet, fmt.Sprintf("/key/info?key=%s", keyID), nil,
 	)
 	if err != nil {
+		// Check if it's a not found error
+		if litellm.IsNotFound(err) {
+			return nil, nil
+		}
 		return nil, fmt.Errorf("failed to get service account: %w", err)
 	}
 
@@ -110,6 +114,10 @@ func DeleteServiceAccount(ctx context.Context, c *litellm.Client, keyID string) 
 		ctx, c, http.MethodPost, "/key/delete", &deleteRequest,
 	)
 	if err != nil {
+		// If it's a not found error, consider it successful (already deleted)
+		if litellm.IsNotFound(err) {
+			return nil
+		}
 		return fmt.Errorf("failed to delete service account: %w", err)
 	}
 

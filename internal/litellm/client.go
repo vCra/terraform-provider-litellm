@@ -13,6 +13,21 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
+// NotFoundError represents a 404 Not Found error that can be checked by users
+type NotFoundError struct {
+	Message string
+}
+
+func (e *NotFoundError) Error() string {
+	return e.Message
+}
+
+// IsNotFound checks if an error is a NotFoundError
+func IsNotFound(err error) bool {
+	_, ok := err.(*NotFoundError)
+	return ok
+}
+
 type Client struct {
 	APIBase        string
 	APIKey         string
@@ -87,6 +102,9 @@ func (c *Client) SendRequest(ctx context.Context, method, path string, body inte
 		"body":        string(bodyBytes),
 	})
 
+	if resp.StatusCode == http.StatusNotFound {
+		return nil, &NotFoundError{Message: fmt.Sprintf("Resource not found (404): %s", string(bodyBytes))}
+	}
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("API request failed with status code %d: %s", resp.StatusCode, string(bodyBytes))
 	}
@@ -151,6 +169,10 @@ func SendRequestTyped[TRequest any, TResponse any](ctx context.Context, c *Clien
 		"status_code": resp.StatusCode,
 		"body":        string(bodyBytes),
 	})
+
+	if resp.StatusCode == http.StatusNotFound {
+		return nil, &NotFoundError{Message: fmt.Sprintf("Resource not found (404): %s", string(bodyBytes))}
+	}
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("API request failed with status code %d: %s", resp.StatusCode, string(bodyBytes))
