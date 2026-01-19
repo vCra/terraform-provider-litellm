@@ -29,10 +29,11 @@ func IsNotFound(err error) bool {
 }
 
 type Client struct {
-	APIBase        string
-	APIKey         string
-	httpClient     *http.Client
-	rateLimitedMux sync.Mutex
+	APIBase           string
+	APIKey            string
+	AdditionalHeaders map[string]string
+	httpClient        *http.Client
+	rateLimitedMux    sync.Mutex
 }
 
 // NewClient creates a new Client.
@@ -40,15 +41,16 @@ type Client struct {
 // WARNING: Setting insecureSkipVerify to true disables TLS certificate verification.
 // This should ONLY be used in development environments or with proper security justification.
 // Disabling certificate verification exposes you to man-in-the-middle attacks and other security risks.
-func NewClient(apiBase, apiKey string, insecureSkipVerify bool) *Client {
+func NewClient(apiBase, apiKey string, insecureSkipVerify bool, additionalHeaders map[string]string) *Client {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: insecureSkipVerify},
 	}
 
 	return &Client{
-		APIBase:    apiBase,
-		APIKey:     apiKey,
-		httpClient: &http.Client{Transport: tr},
+		APIBase:           apiBase,
+		APIKey:            apiKey,
+		AdditionalHeaders: additionalHeaders,
+		httpClient:        &http.Client{Transport: tr},
 	}
 }
 
@@ -85,6 +87,11 @@ func (c *Client) SendRequest(ctx context.Context, method, path string, body inte
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("x-api-key", c.APIKey)
 	req.Header.Set("accept", "application/json")
+
+	// Add any additional headers
+	for key, value := range c.AdditionalHeaders {
+		req.Header.Set(key, value)
+	}
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
@@ -153,6 +160,11 @@ func SendRequestTyped[TRequest any, TResponse any](ctx context.Context, c *Clien
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("x-api-key", c.APIKey)
 	req.Header.Set("accept", "application/json")
+
+	// Add any additional headers
+	for key, value := range c.AdditionalHeaders {
+		req.Header.Set(key, value)
+	}
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {

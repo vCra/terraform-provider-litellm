@@ -59,6 +59,12 @@ func Provider() *schema.Provider {
 				Default:     false,
 				Description: "Skip TLS certificate verification when connecting to the LiteLLM API",
 			},
+			"additional_headers": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Description: "Additional headers to include in API requests",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
 		},
 		ConfigureContextFunc: providerConfigureContext,
 	}
@@ -66,13 +72,24 @@ func Provider() *schema.Provider {
 
 // providerConfigureContext configures the provider with the given schema data and tests the connection.
 func providerConfigureContext(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
+	// Get additional headers from schema and convert to map[string]string
+	additionalHeaders := make(map[string]string)
+	if headers := d.Get("additional_headers").(map[string]interface{}); headers != nil {
+		for key, value := range headers {
+			if strValue, ok := value.(string); ok {
+				additionalHeaders[key] = strValue
+			}
+		}
+	}
+
 	config := litellm.ProviderConfig{
 		APIBase:            d.Get("api_base").(string),
 		APIKey:             d.Get("api_key").(string),
 		InsecureSkipVerify: d.Get("insecure_skip_verify").(bool),
+		AdditionalHeaders:  additionalHeaders,
 	}
 
-	client := litellm.NewClient(config.APIBase, config.APIKey, config.InsecureSkipVerify)
+	client := litellm.NewClient(config.APIBase, config.APIKey, config.InsecureSkipVerify, config.AdditionalHeaders)
 
 	// Test the connection by calling GET /models
 	if err := testConnection(ctx, client); err != nil {
