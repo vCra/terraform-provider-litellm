@@ -94,12 +94,20 @@ func (r *UserResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 			"teams": schema.ListAttribute{
 				Description: "List of team IDs the user belongs to.",
 				Optional:    true,
+				Computed:    true,
 				ElementType: types.StringType,
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"models": schema.ListAttribute{
 				Description: "Model names the user is allowed to call. Set to ['no-default-models'] to block all model access.",
 				Optional:    true,
+				Computed:    true,
 				ElementType: types.StringType,
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"max_budget": schema.Float64Attribute{
 				Description: "Maximum budget for the user.",
@@ -126,7 +134,11 @@ func (r *UserResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 			"metadata": schema.MapAttribute{
 				Description: "Metadata for the user.",
 				Optional:    true,
+				Computed:    true,
 				ElementType: types.StringType,
+				PlanModifiers: []planmodifier.Map{
+					mapplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"spend": schema.Float64Attribute{
 				Description: "Amount spent by this user.",
