@@ -439,7 +439,10 @@ func (r *ModelResource) createOrUpdateModel(ctx context.Context, data *ModelReso
 		"base_model": baseModel,
 		"tier":       data.Tier.ValueString(),
 		"mode":       data.Mode.ValueString(),
-		"team_id":    data.TeamID.ValueString(),
+	}
+
+	if !data.TeamID.IsNull() && data.TeamID.ValueString() != "" {
+		modelInfo["team_id"] = data.TeamID.ValueString()
 	}
 
 	// Add access_groups to model_info if specified
@@ -666,7 +669,10 @@ func (r *ModelResource) patchModel(ctx context.Context, data *ModelResourceModel
 		"base_model": baseModel,
 		"tier":       data.Tier.ValueString(),
 		"mode":       data.Mode.ValueString(),
-		"team_id":    data.TeamID.ValueString(),
+	}
+
+	if !data.TeamID.IsNull() && data.TeamID.ValueString() != "" {
+		modelInfo["team_id"] = data.TeamID.ValueString()
 	}
 
 	// Add access_groups to model_info if specified
